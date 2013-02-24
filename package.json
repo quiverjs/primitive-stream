@@ -1,0 +1,29 @@
+{
+  "author": {
+    "name": "Soares Chen",
+    "email": "soares.chen@gmail.com",
+    "url": "http://soareschen.com"
+  },
+  "name": "quiver-primitive-stream",
+  "desription": "primitive implementation of a stream channel with consistent states",
+  "version": "0.0.1",
+  "homepage": "https://github.com/quiverjs/primitive-stream",
+  "repository": {
+    "url": "git@github.com:quiverjs/primitive-stream.git"
+  },
+  "devDependencies": {
+    "vows": ">=0.7.0"
+  },
+  "bugs": {
+    "url": "https://github.com/quiverjs/primitive-stream/issues",
+    "email": "soares.chen@gmail.com"
+  },
+  "licenses": {
+    "type": "MIT",
+    "url": "https://raw.github.com/quiverjs/license/master/LICENSE"
+  },
+  "main": "./lib/primitive-stream-channel",
+  "scripts": {
+    "test": "vows --spec"
+  }
+}
