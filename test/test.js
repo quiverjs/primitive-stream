@@ -1,6 +1,5 @@
 
-var vows = require('vows')
-var assert = require('assert')
+var should = require('should')
 var createChannel = require('../lib/primitive-stream-channel').createPrimitiveStreamChannel
 
 var guardCallback = function(callback) {
@@ -11,142 +10,122 @@ var guardCallback = function(callback) {
   }
 }
 
-vows.describe('different correct read write sequences')
-.addBatch(
-{
-  'read write write read read closeWrite': {
-    topic: function() {
-      var callback = this.callback
+describe('different correct read write sequences', function() {
+  it('read write write read read closeWrite', function(callback) {
+    var channel = createChannel()
+    var readStream = channel.readStream
+    var writeStream = channel.writeStream
 
-      var channel = createChannel()
-      var readStream = channel.readStream
-      var writeStream = channel.writeStream
+    var firstData = 'foo'
+    var secondData = 'bar'
+    var closeErr = 'error'
 
-      var firstData = 'foo'
-      var secondData = 'bar'
-      var closeErr = 'error'
+    // 1
+    readStream.read(guardCallback(function(streamClosed, data) {
+      should.not.exist(streamClosed)
+      data.should.equal(firstData)
 
-      // 1
-      readStream.read(guardCallback(function(streamClosed, data) {
-        assert.isNull(streamClosed)
-        assert.equal(data, firstData)
-
-        // 3
-        writeStream.prepareWrite(guardCallback(function(streamClosed, writer) {
-          assert.isNull(streamClosed)
-          assert.isFunction(writer)
-
-          writer(null, secondData)
-        }))
-
-        // 4
-        readStream.read(guardCallback(function(streamClosed, data) {
-          assert.isNull(streamClosed)
-          assert.equal(data, secondData)
-
-          // 5
-          readStream.read(guardCallback(function(streamClosed, data) {
-            assert.isObject(streamClosed)
-            assert.equal(streamClosed.err, closeErr)
-            assert.isUndefined(data)
-
-            callback(null)
-          }))
-
-          // 6
-          writeStream.closeWrite(closeErr)
-        }))
-      }))
-
-      // 2
+      // 3
       writeStream.prepareWrite(guardCallback(function(streamClosed, writer) {
-        assert.isNull(streamClosed)
-        assert.isFunction(writer)
+        should.not.exist(streamClosed)
+        writer.should.be.a('function')
 
-        writer(null, firstData)
-      }))
-    },
-    'should success': function() { }
-  },
-
-  'write read read write closeRead write': {
-    topic: function() {
-      var callback = this.callback
-
-      var channel = createChannel()
-      var readStream = channel.readStream
-      var writeStream = channel.writeStream
-
-      var firstData = 'foo'
-      var secondData = 'bar'
-      var closeErr = 'error'
-
-      // 1
-      writeStream.prepareWrite(guardCallback(function(streamClosed, writer) {
-        assert.isNull(streamClosed)
-        assert.isFunction(writer)
-
-        writer(null, firstData)
+        writer(null, secondData)
       }))
 
-      // 2
+      // 4
       readStream.read(guardCallback(function(streamClosed, data) {
-        assert.isNull(streamClosed)
-        assert.equal(data, firstData)
+        should.not.exist(streamClosed)
+        data.should.equal(secondData)
 
-        // 3
+        // 5
         readStream.read(guardCallback(function(streamClosed, data) {
-          assert.isNull(streamClosed)
-          assert.equal(data, secondData)
+          should.exist(streamClosed)
+          streamClosed.err.should.equal(closeErr)
+          should.not.exist(data)
 
-          // 5
-          readStream.closeRead(closeErr)
-
-          // 6
-          writeStream.prepareWrite(guardCallback(function(streamClosed, writer) {
-            assert.isObject(streamClosed)
-            assert.equal(streamClosed.err, closeErr)
-            assert.isUndefined(writer)
-
-            callback(null)
-          }))
+          callback(null)
         }))
 
-        // 4
-        writeStream.prepareWrite(guardCallback(function(streamClosed, writer) {
-          assert.isNull(streamClosed)
-          assert.isFunction(writer)
+        // 6
+        writeStream.closeWrite(closeErr)
+      }))
+    }))
 
-          writer(null, secondData)
+    // 2
+    writeStream.prepareWrite(guardCallback(function(streamClosed, writer) {
+      should.not.exist(streamClosed)
+      writer.should.be.a('function')
+
+      writer(null, firstData)
+    }))
+  })
+
+  it('write read read write closeRead write', function(callback) {
+    var channel = createChannel()
+    var readStream = channel.readStream
+    var writeStream = channel.writeStream
+
+    var firstData = 'foo'
+    var secondData = 'bar'
+    var closeErr = 'error'
+
+    // 1
+    writeStream.prepareWrite(guardCallback(function(streamClosed, writer) {
+      should.not.exist(streamClosed)
+      writer.should.be.a('function')
+
+      writer(null, firstData)
+    }))
+
+    // 2
+    readStream.read(guardCallback(function(streamClosed, data) {
+      should.not.exist(streamClosed)
+      data.should.equal(firstData)
+
+      // 3
+      readStream.read(guardCallback(function(streamClosed, data) {
+        should.not.exist(streamClosed)
+        data.should.equal(secondData)
+
+        // 5
+        readStream.closeRead(closeErr)
+
+        // 6
+        writeStream.prepareWrite(guardCallback(function(streamClosed, writer) {
+          should.exist(streamClosed)
+          streamClosed.err.should.equal(closeErr)
+          should.not.exist(writer)
+          
+          callback(null)
         }))
       }))
 
-    },
-    'should success': function() { }
-  },
+      // 4
+      writeStream.prepareWrite(guardCallback(function(streamClosed, writer) {
+        should.not.exist(streamClosed)
+        writer.should.be.a('function')
+
+        writer(null, secondData)
+      }))
+    }))
+  })
 })
-.export(module)
 
-
-vows.describe('inconsistent states').addBatch({
-  'when read is called twice': 
-  {  
-    topic: createChannel(),
-    'exception is thrown the second time': function(channel) {
-      var readStream = channel.readStream
-
-      assert.doesNotThrow(function() {
-        readStream.read(function(streamClosed, buffer) {
-          assert.isTrue(false)
-        })
+describe('inconsistent states', function() {
+  it('when read is called twice', function() {
+    var channel = createChannel()
+    var readStream = channel.readStream
+    ;(function() {
+      readStream.read(function(streamClosed, buffer) {
+        should.fail()
       })
+    }).should.not.throw()
 
-      assert.throws(function() {
-        readStream.read(function(streamClosed, buffer) {
-          assert.isTrue(false)
-        })
+    ;(function() {
+      readStream.read(function(streamClosed, buffer) {
+        should.fail()
       })
-    }
-  }
+    }).should.throw()
+  })
 })
-.export(module)
