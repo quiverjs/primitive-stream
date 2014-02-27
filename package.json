@@ -6,17 +6,17 @@
   },
   "name": "quiver-primitive-stream",
   "desription": "primitive implementation of a stream channel with consistent states",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "homepage": "https://github.com/quiverjs/primitive-stream",
   "repository": {
     "url": "git@github.com:quiverjs/primitive-stream.git"
   },
   "dependencies": {
-    "quiver-object": ">=0.0.1"
+    "quiver-object": "~0.0.1"
   },
   "devDependencies": {
-    "mocha": ">=1.8.1",
-    "should": ">=1.2.2"
+    "mocha": "~1.17.1",
+    "should": "~3.1.2"
   },
   "bugs": {
     "url": "https://github.com/quiverjs/primitive-stream/issues",

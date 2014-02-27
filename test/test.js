@@ -1,4 +1,6 @@
 
+'use strict'
+
 var should = require('should')
 var createChannel = require('../lib/primitive-stream-channel').createPrimitiveStreamChannel
 
@@ -28,7 +30,7 @@ describe('different correct read write sequences', function() {
       // 3
       writeStream.prepareWrite(guardCallback(function(streamClosed, writer) {
         should.not.exist(streamClosed)
-        writer.should.be.a('function')
+        writer.should.be.a.Function
 
         writer(null, secondData)
       }))
@@ -55,7 +57,7 @@ describe('different correct read write sequences', function() {
     // 2
     writeStream.prepareWrite(guardCallback(function(streamClosed, writer) {
       should.not.exist(streamClosed)
-      writer.should.be.a('function')
+      writer.should.be.a.Function
 
       writer(null, firstData)
     }))
@@ -73,7 +75,7 @@ describe('different correct read write sequences', function() {
     // 1
     writeStream.prepareWrite(guardCallback(function(streamClosed, writer) {
       should.not.exist(streamClosed)
-      writer.should.be.a('function')
+      writer.should.be.a.Function
 
       writer(null, firstData)
     }))
@@ -104,7 +106,7 @@ describe('different correct read write sequences', function() {
       // 4
       writeStream.prepareWrite(guardCallback(function(streamClosed, writer) {
         should.not.exist(streamClosed)
-        writer.should.be.a('function')
+        writer.should.be.a.Function
 
         writer(null, secondData)
       }))
